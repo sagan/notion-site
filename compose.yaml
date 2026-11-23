@@ -2,14 +2,14 @@
 # Required env:
 #   DOMAIN=example.com # The domain
 #   TOKEN=123456 # The admin token
-# See README.md or .env.example for more optional env variables.
+# Optional but recommended to configure env:
+#   CLOUDFLARE_API_TOKEN, CLOUDFLARE_ZONE_ID
+# See README.md or .env.example for more info.
 services:
   redis:
     image: redis:alpine
     restart: unless-stopped
     command: redis-server --appendonly yes
-    ports:
-      - "127.0.0.1:6379:6379"
     volumes:
       - ./redis-data:/data
     healthcheck:
@@ -26,6 +26,9 @@ services:
         condition: service_healthy
     environment:
       REDIS_URL: redis://redis:6379
+      TOKEN: "${TOKEN}"
+      CLOUDFLARE_API_TOKEN: "${CLOUDFLARE_API_TOKEN:-}"
+      CLOUDFLARE_ZONE_ID: "${CLOUDFLARE_ZONE_ID:-}"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.${COMPOSE_PROJECT_NAME}.rule=Host(`${DOMAIN}`) || Host(`www.${DOMAIN}`)"
